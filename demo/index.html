@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+	<title>CSS Carousel</title>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+	<div id="wrapper">
+
+		<section id="my-carousel">
+
+			<div class="carousel">
+				<ul class="carousel-list">
+					<li class="carousel-item">
+						<figure class="resp-img">
+							<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&text=1" alt="placeholder">
+						</figure>
+					</li>
+					<li class="carousel-item">
+						<figure class="resp-img">
+							<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&text=2" alt="placeholder">
+						</figure>
+					</li>
+					<li class="carousel-item">
+						<figure class="resp-img">
+							<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&text=3" alt="placeholder">
+						</figure>
+					</li>
+					<li class="carousel-item">
+						<figure class="resp-img">
+							<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&text=4" alt="placeholder">
+						</figure>
+					</li>
+					<li class="carousel-item">
+						<figure class="resp-img">
+							<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&text=5" alt="placeholder">
+						</figure>
+					</li>
+				</ul>
+			</div>
+
+			<nav class="carousel-nav">
+				<ul class="carousel-pagination">
+					<a class="carousel-prev" data-gotoslide="prev" role="prev" href="#/prev">&lt;</a>
+					<li class="carousel-page">
+						<a class="" data-gotoslide="0" href="#!/slide1">1</a>
+					</li>
+					<li class="carousel-page">
+						<a class="" data-gotoslide="1" href="#!/slide2">2</a>
+					</li>
+					<li class="carousel-page">
+						<a class="" data-gotoslide="2" href="#!/slide3">3</a>
+					</li>
+					<li class="carousel-page">
+						<a class="" data-gotoslide="3" href="#!/slide4">4</a>
+					</li>
+					<li class="carousel-page">
+						<a class="" data-gotoslide="4" href="#!/slide5">5</a>
+					</li>
+					<a class="carousel-next" data-gotoslide="next" role="next" href="#/next">&gt;</a>
+				</ul>
+			</nav>
+
+		</section>
+
+	</div> <!-- /wrapper -->
+
+	<script src="jquery-1.8.2.js"></script>
+	<script src="css-carousel.js"></script>
+	<script>
+
+		$(document).ready(function () {
+			var myCarousel = $('#my-carousel'),
+				clickEventType = ('createTouch' in document) ? 'touchstart' : 'click';
+
+			var carousel = new Carousel({
+				el: myCarousel,
+				// eventType: clickEventType,
+				// automove: 1000,
+				continuous: true,
+				pagination: true,
+				keyNav: true,
+				goto: 0
+			});
+		}());
+
+	</script>
+
+</body>
+</html>

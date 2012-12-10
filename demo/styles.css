@@ -1,0 +1,75 @@
+* { margin: 0; padding: 0; }
+ul { list-style: none outside; }
+body {
+	font-family: Arial;
+	font-size: 62.5%;
+	background-color: #f8f8f8;
+}
+#wrapper {
+	font-size: 1.6em;
+	margin: 3em auto;
+	width: 80%;
+}
+.resp-img {
+	width: 100%;
+}
+.resp-img > img {
+	max-width: 100%;
+}
+.carousel {
+    border: 1px solid #bbbbbb;
+    width: 400px;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    margin: auto;
+}
+.carousel-list {
+	position: absolute;
+	width: 10000em;
+	-webkit-transition: 0.4s all ease 0s;
+}
+.carousel-item {
+	float: left;
+	width: 400px;
+}
+.carousel-nav {
+	margin: 2em auto;
+}
+.carousel-pagination {
+	text-align: center;
+}
+.carousel-page {
+	display: inline-block;
+	font-size: 0.8em;
+}
+.carousel-pagination a {
+	text-decoration: none;
+}
+.carousel-page > a {
+	display: block;
+	color: #fff;
+	width: 1.2em;
+	height: 1.2em;
+	line-height: 1.3em;
+	border-radius: 50%;
+	margin: 0 0.4em;
+	background-color: rgba(0, 0, 0, 0.2);
+	-webkit-transition: 0.4s all ease 0.1s;
+}
+.carousel-page > a.current {
+	background-color: rgba(0, 0, 0, 0.7);
+}
+.carousel-prev,
+.carousel-next {
+	color: #333;
+}
+.carousel-prev {
+	margin-right: 2em;
+}
+.carousel-next {
+	margin-left: 2em;
+}
+.disable {
+	display: none;
+}
