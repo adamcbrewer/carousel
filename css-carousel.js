@@ -50,9 +50,9 @@
 		updatePrevNext: function () {
 			if (!args.continuous) {
 				if (this.current === 0) {
-					this.prevNext.removeClass('disable').filter('[role="prev"]').addClass('disable');
+					this.prevNext.removeClass('disable').filter('[data-gotoslide="prev"]').addClass('disable');
 				} else if (this.current === this.slideCount-1) {
-					this.prevNext.removeClass('disable').filter('[role="next"]').addClass('disable');
+					this.prevNext.removeClass('disable').filter('[data-gotoslide="next"]').addClass('disable');
 				} else {
 					if (this.prevNext.hasClass('disable')) this.prevNext.removeClass('disable');
 				}
@@ -169,7 +169,7 @@
 			this.list = el.find('.carousel-list');
 			this.slides = el.find('.carousel-item');
 			this.nav = el.find('.carousel-nav');
-			this.prevNext = args.pagination ? el.find('.carousel-pagination').find('[role="prev"], [role="next"]') : false;
+			this.prevNext = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide="prev"], [data-gotoslide="next"]') : false;
 			this.paginators = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide]') : false;
 
 			this.slideCount = this.slides.length;
