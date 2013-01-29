@@ -38,26 +38,56 @@
 			this.goto(this.current);
 
 			// args.automove should be an integer of seconds delay
-			if (args.automove) this.initAutomove(args.automove);
+			if (args.automove) {
+				this.initAutomove(args.automove);
+			}
 
 		},
 
 		goto: function (slidePos) {
-			this.list.css({ left: -(slidePos * this.moveDist) });
-			if (this.paginators) this.updatePrevNext(slidePos);
+
+			var leftPos = (slidePos * this.moveDist);
+
+            // don't overshoot if we have
+            // multiple items in the carousel window
+            if (this.maxMoveLeft && leftPos > this.maxMoveLeft) {
+                leftPos = this.maxMoveLeft;
+            }
+
+            this.current = parseInt(slidePos, 10);
+
+            this.list.css({ left: -leftPos });
+            if (this.paginators) {
+                this.updatePrevNext(leftPos);
+            }
+
 		},
 
 		updatePrevNext: function () {
 			if (!args.continuous) {
-				if (this.current === 0) {
-					this.prevNext.removeClass('disable').filter('[data-gotoslide="prev"]').addClass('disable');
-				} else if (this.current === this.slideCount-1) {
-					this.prevNext.removeClass('disable').filter('[data-gotoslide="next"]').addClass('disable');
-				} else {
-					if (this.prevNext.hasClass('disable')) this.prevNext.removeClass('disable');
-				}
-			}
-			if (this.paginators) this.updatePagination(this.paginators.filter('[data-gotoslide="'+this.current+'"]'));
+                if (this.slideCount === 1) {
+                    this.prevNext.addClass('disable');
+                } else {
+                    if (this.current === 0) {
+                        this.prevNext.removeClass('disable').filter('[data-gotoslide="prev"]').addClass('disable');
+                    } else if (this.current === this.slideCount-1) {
+                        this.prevNext.removeClass('disable').filter('[data-gotoslide="next"]').addClass('disable');
+                    } else {
+                        if (this.prevNext.hasClass('disable')) this.prevNext.removeClass('disable');
+                    }
+                }
+            }
+
+			// remove the 'next' button if we have multiple
+            // items in the carousel window
+            if (this.maxMoveLeft && slidePos >= this.maxMoveLeft) {
+                this.prevNext.filter('[data-gotoslide="next"]').addClass('disable');
+            }
+
+            if (this.paginators) {
+                this.updatePagination(this.paginators.filter('[data-gotoslide="'+this.current+'"]'));
+            }
+
 		},
 
 		updatePagination: function (el) {
@@ -107,6 +137,89 @@
 			if (pos !== null) this.goto(pos);
 
 		},
+
+
+		// Items are expected match the HTML structre and style
+        // of the other items on the slide list
+        addItems: function (items) {
+
+            items = items || [];
+
+            if (items.length > 0) {
+                var i = 0;
+                for (i; i < items.length; i++) {
+                    var newSlide = items[i];
+                    this.list.append(newSlide);
+
+                    this.slideCount++;
+
+                    // update the number of paginated items
+                    if (this.paginators) {
+                        var pageItem = this.nav.find('.carousel-page:last-child'),
+                            newItem = pageItem.clone();
+                           console.log(pageItem);
+                        pageItem.after(newItem);
+                        newItem.find('[data-gotoslide]').attr('data-gotoslide', this.slideCount - 1).removeClass('current');
+                    }
+                }
+
+                // need to run setup in order to track some of
+                // the new elements
+                this._setup(this.el);
+
+            }
+
+            return this;
+
+        },
+
+        removeItems: function (items) {
+
+			items = items || [];
+
+			// make sure we have items to remove
+            if (items.length > 0) {
+                var i = 0;
+                for (i; i < items.length; i++) {
+
+					// decrement the slideCount and
+					// current slide item as we go
+                    this.slideCount--;
+                    this.current--;
+
+                    // remove the page item we've requested
+                    if (this.paginators) {
+                        $(this.nav.find('li')[i]).remove();
+                    }
+                    // remove the slide element
+                    $(this.slides[i]).remove();
+
+                }
+
+                // need to run setup in order to track some of
+                // the new elements
+                this._setup(this.el);
+
+                // now we need to update the indexes of all
+                // other gotoslide links
+                // TODO: innerHTML of the links
+                if (this.paginators) {
+                    var k = 0;
+                    for (k; k < this.slideCount; k++) {
+                        $(this.paginators[k]).attr('data-gotoslide', k);
+                    }
+                }
+
+                // make sure we're stil on the
+                // last items we were previously viewing
+                this.goto(this.current);
+
+            }
+
+            return this;
+
+        },
+
 
 		_bindEvents: function (el) {
 
@@ -159,12 +272,28 @@
 		},
 
 		_calcDimentions: function () {
-			this.moveDist = parseInt(this.carousel.css('width'), 10);
+
+			var firstSlide = this.slides.first(),
+                moveDist = parseInt(firstSlide.css('width'), 10) + parseInt(firstSlide.css('marginRight'), 10),
+                carouselWidth = parseInt(this.carousel.css('width'), 10);
+
+            // the carousel moves the distance of the width of the slides
+            this.moveDist = moveDist;
+
+            // However, if there are multiple items in the carousel view window
+            // then we have to make sure we don't want to 'slide-past' the last item
+            if (moveDist < carouselWidth) {
+                var combinedSlideWidth = moveDist * this.slides.length + parseInt(this.list.css('paddingRight'), 10);
+                this.maxMoveLeft = combinedSlideWidth - carouselWidth;
+
+            }
+
 		},
 
 		_setup: function (el) {
 
 			// storing the elements for later
+			this.el = el;
 			this.carousel = el.find('.carousel');
 			this.list = el.find('.carousel-list');
 			this.slides = el.find('.carousel-item');

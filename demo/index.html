@@ -67,22 +67,35 @@
 	</div> <!-- /wrapper -->
 
 	<script src="jquery-1.8.2.js"></script>
-	<script src="css-carousel.js"></script>
+	<script src="../css-carousel.js"></script>
 	<script>
 
 		$(document).ready(function () {
 			var myCarousel = $('#my-carousel'),
-				clickEventType = ('createTouch' in document) ? 'touchstart' : 'click';
+				clickEventType = ('createTouch' in document) ? 'touchstart' : 'click',
+
+				newItem1 = "";
+
+			newItem1 += '<li class="carousel-item">';
+			newItem1 += '<figure class="resp-img">';
+			newItem1 += '<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&amp;text=newItem" alt="placeholder">';
+			newItem1 += '</figure>';
+			newItem1 += '</li>';
 
 			var carousel = new Carousel({
 				el: myCarousel,
 				// eventType: clickEventType,
 				// automove: 1000,
-				continuous: true,
+				continuous: false,
 				pagination: true,
 				keyNav: true,
 				goto: 0
 			});
+			setTimeout(function() {
+				carousel.addItems([
+					newItem1
+				]).goto(carousel.slideCount - 1)
+			}, 1000);
 		}());
 
 	</script>
