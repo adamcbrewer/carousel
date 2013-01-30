@@ -94,8 +94,13 @@
 			setTimeout(function() {
 				carousel.addItems([
 					newItem1
-				]).goto(carousel.slideCount - 1)
+				]).goto(5)
 			}, 1000);
+			setTimeout(function() {
+				carousel.removeItems([
+					0,1,2
+				])
+			}, 3000);
 		}());
 
 	</script>

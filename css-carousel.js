@@ -155,12 +155,12 @@
 
                     // update the number of paginated items
                     if (this.paginators) {
-                        var pageItem = this.nav.find('.carousel-page:last-child'),
+                        var pageItem = this.nav.find('.carousel-page').last(),
                             newItem = pageItem.clone();
-                           console.log(pageItem);
                         pageItem.after(newItem);
-                        newItem.find('[data-gotoslide]').attr('data-gotoslide', this.slideCount - 1).removeClass('current');
+                        newItem.find('[data-gotoslide]').attr('data-gotoslide', this.slideCount - 1).html(this.slideCount).removeClass('current');
                     }
+
                 }
 
                 // need to run setup in order to track some of
