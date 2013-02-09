@@ -81,10 +81,8 @@
 	var carousel = {
 
 		init: function (args) {
-			this.current = args.goto || 0;
-			console.log(this.current	);
 
-			this._setup(args.el);
+			this._setup(args);
 			this._calcDimentions();
 			this._bindEvents();
 
@@ -98,9 +96,16 @@
 
 		},
 
-		goto: function (slidePos) {
 
-			var leftPos = (slidePos * this.moveDist);
+		/**
+		 * Force the carousel the slide number passed
+		 *
+		 */
+		goto: function (pos) {
+
+			pos = parseInt(pos, 10);
+
+			var leftPos = (pos * this.moveDist);
 
             // don't overshoot if we have
             // multiple items in the carousel window
@@ -108,15 +113,24 @@
                 leftPos = this.maxMoveLeft;
             }
 
-            this.current = parseInt(slidePos, 10);
+            this.current = pos;
 
+            // Update the carousel left position to
+            // bring the requested slide in to view
             this.list.css({ left: -leftPos });
+
             if (this.paginators) {
                 this.updatePrevNext(leftPos);
             }
 
 		},
 
+
+		/**
+		 * Governs the hiding and showing of the 'previous'
+		 * and 'next' pagination links
+		 *
+		 */
 		updatePrevNext: function () {
 			if (!args.continuous) {
                 if (this.slideCount === 1) {
@@ -144,11 +158,24 @@
 
 		},
 
+
+		/**
+		 * Updates the pagination to highlight
+		 * the 'current' slide
+		 *
+		 */
 		updatePagination: function (el) {
 			this.paginators.removeClass('current');
 			el.addClass('current');
 		},
 
+
+		/**
+		 * Automated animation of the carousel.
+		 * Requires an integer of milliseconds to be passed
+		 * in to the 'automove' property when initiated
+		 *
+		 */
 		initAutomove:  function (int) {
 			int = (typeof int === 'number') ? int : 4000;
 
@@ -160,12 +187,25 @@
 
 		},
 
+
+		/**
+		 * Figues out where you want to go in the carousel by passing
+		 * in either a string for 'next|prev', or a slide number.
+		 *
+		 * If 'continuous' is passed in as true, the carousel will
+		 * continue in the direction of choice indefinitely.
+		 *
+		 * @param  {string|number} where
+		 * @param  {boolean} continuous
+		 *
+		 */
 		processWhere: function (where, continuous) {
 			where = where || false;
 			continuous = continuous || false;
 
 			var pos = null;
 			switch (where) {
+
 				case 'prev':
 					if ( ( this.current - 1 ) >= 0 ) {
 						pos = --this.current;
@@ -174,6 +214,7 @@
 						pos = this.current;
 					}
 					break;
+
 				case 'next':
 					if ( ( this.current + 1 ) < this.slideCount ) {
 						pos = ++this.current;
@@ -182,19 +223,25 @@
 						pos = this.current;
 					}
 					break;
+
 				// the default should be a number
 				default:
-					pos = where;
+					pos = parseInt(where, 10);
 					this.current = pos;
 					break;
+
 			}
 			if (pos !== null) this.goto(pos);
 
 		},
 
 
-		// Items are expected match the HTML structre and style
-        // of the other items on the slide list
+		/**
+		 * Will add an array of new slide items.
+		 * Items are expected match the HTML structre and style
+		 * of the other items on the slide list.
+		 *
+		 */
         addItems: function (items) {
 
             items = items || [];
@@ -227,6 +274,13 @@
 
         },
 
+
+        /**
+         * Removes items off the carousel.
+         *
+         * @param  {array} items An array of integers of the slide numbers being removed
+         *
+         */
         removeItems: function (items) {
 
 			items = items || [];
@@ -344,7 +398,11 @@
 
 		},
 
-		_setup: function (el) {
+		_setup: function (args) {
+
+			var el = args.el;
+
+			this.current = args.goto || 0;
 
 			// storing the elements for later
 			this.el = el;
