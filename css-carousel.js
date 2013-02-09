@@ -1,4 +1,4 @@
-// Custom Carousel Class
+// CSS Carousel
 //
 // Set the left position of the carousel <ul> according to the widths on the <li>'s contained.
 // Relies on css-transitions for the animation.
@@ -6,17 +6,10 @@
 // @author Adam Brewer
 // ================================
 //
-// @args
-//
-// el			- The element wrapping the carousel and nav.
-// eventType	- Delegate the event used for either clicking or tapping. Defaults to 'click'
-// automove	- Auto-slide the carousel. Specify a number to be used in the timeout. Not set by default.
-//
 //
 //
 ;var Carousel = function (args) {
 
-	// passed in arguments
 	args = args || {};
 
 	if (!args.el) {
@@ -24,11 +17,72 @@
 		return false;
 	}
 
-	// public methods
+
+
+	//
+	// Private Methods
+	// =======================
+	//
+
+
+	/**
+	 * An extend function to merg our default arguments
+	 * with a passed in from the user
+	 *
+	 * @param  {object} obj    The default settings
+	 * @param  {object} extObj Arguments from the user
+	 * @return {object}        A merged object
+	 */
+	var extend = function(obj, extObj) {
+		if (arguments.length > 2) {
+			var a = 1;
+			for (a; a < arguments.length; a++) {
+				extend(obj, arguments[a]);
+			}
+		} else {
+			for (var i in extObj) {
+				obj[i] = extObj[i];
+			}
+		}
+		return obj;
+	};
+
+
+
+	/**
+	 * These are the default settings
+	 * for our carousel
+	 * @type {Object}
+	 */
+	var defaultArgs = {
+		eventType: 'click',
+		automove: false,
+		continuous: false,
+		pagination: true,
+		keyNav: false,
+		goto: 0
+	};
+
+
+
+	// merging passed in arguments with our own
+	args = extend(defaultArgs, args);
+
+
+
+	//
+	// Public Methods
+	// =======================
+	//
+
+
+
+
 	var carousel = {
 
-		init: function () {
+		init: function (args) {
 			this.current = args.goto || 0;
+			console.log(this.current	);
 
 			this._setup(args.el);
 			this._calcDimentions();
@@ -307,7 +361,7 @@
 
 	};
 
-	carousel.init();
+	carousel.init(args);
 
 	return carousel;
 

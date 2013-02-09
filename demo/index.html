@@ -71,36 +71,32 @@
 	<script>
 
 		$(document).ready(function () {
+
 			var myCarousel = $('#my-carousel'),
 				clickEventType = ('createTouch' in document) ? 'touchstart' : 'click',
 
 				newItem1 = "";
 
-			newItem1 += '<li class="carousel-item">';
-			newItem1 += '<figure class="resp-img">';
-			newItem1 += '<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&amp;text=newItem" alt="placeholder">';
-			newItem1 += '</figure>';
-			newItem1 += '</li>';
+			// newItem1 += '<li class="carousel-item">';
+			// newItem1 += '<figure class="resp-img">';
+			// newItem1 += '<img class="gallery-img" src="http://placehold.it/600x400/333333/F8F8F8&amp;text=newItem" alt="placeholder">';
+			// newItem1 += '</figure>';
+			// newItem1 += '</li>';
 
 			var carousel = new Carousel({
-				el: myCarousel,
-				// eventType: clickEventType,
-				// automove: 1000,
-				continuous: false,
-				pagination: true,
-				keyNav: true,
-				goto: 0
+				el: myCarousel
 			});
-			setTimeout(function() {
-				carousel.addItems([
-					newItem1
-				]).goto(5)
-			}, 1000);
-			setTimeout(function() {
-				carousel.removeItems([
-					0,1,2
-				])
-			}, 3000);
+
+			// setTimeout(function() {
+			// 	carousel.addItems([
+			// 		newItem1
+			// 	]).goto(5)
+			// }, 1000);
+			// setTimeout(function() {
+			// 	carousel.removeItems([
+			// 		0,1,2
+			// 	])
+			// }, 3000);
 		}());
 
 	</script>
