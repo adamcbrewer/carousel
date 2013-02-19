@@ -10,19 +10,17 @@
 //
 ;var Carousel = function (args) {
 
+	//
+	// Private Methods
+	// =======================
+	//
+
 	args = args || {};
 
 	if (!args.el) {
 		console.error('Please specify a carousel container');
 		return false;
 	}
-
-
-
-	//
-	// Private Methods
-	// =======================
-	//
 
 
 	/**
@@ -32,6 +30,7 @@
 	 * @param  {object} obj    The default settings
 	 * @param  {object} extObj Arguments from the user
 	 * @return {object}        A merged object
+	 *
 	 */
 	var extend = function(obj, extObj) {
 		if (arguments.length > 2) {
@@ -48,11 +47,9 @@
 	};
 
 
-
 	/**
-	 * These are the default settings
-	 * for our carousel
-	 * @type {Object}
+	 * These are the default settings for our carousel
+	 *
 	 */
 	var defaultArgs = {
 		eventType: 'click',
@@ -63,10 +60,101 @@
 		goto: 0
 	};
 
-
-
 	// merging passed in arguments with our own
 	args = extend(defaultArgs, args);
+
+
+
+	var _bindEvents = function (args) {
+
+		var that = this,
+			eventType = args.eventType || 'click';
+
+		this.nav.on(eventType, '[data-gotoslide]', function (evt) {
+			evt.preventDefault();
+
+			var where = this.getAttribute('data-gotoslide');
+			that.processWhere(where, args.continuous);
+
+		});
+
+		this.carousel.on(eventType, function (evt) {
+			evt.preventDefault();
+			that.processWhere('next', args.continuous);
+
+		});
+
+		// pause the auto timeout where the user is focusing in on it
+		if (args.automove) {
+			args.el.on({
+				mouseenter: function (evt) {
+					if (that._autoInterval) clearInterval(that._autoInterval), that._autoInterval = false;
+				},
+				mouseleave: function () {
+					if (!that._autoInterval) that.initAutomove(args.automove);
+				}
+			});
+		}
+
+		// Enable keyboard naviagation
+		if (args.keyNav) {
+			if (window.addEventListener) window.addEventListener('keydown', function (evt) {
+				var keycode = evt.keyCode || false;
+				if (keycode) {
+
+					// Cycling (prev/next using key arrows)
+					if (keycode === 37) { // left
+						that.processWhere('prev', args.continuous);
+					} else if (keycode === 39) { // left
+						that.processWhere('next', args.continuous);
+					}
+
+				}
+			});
+		}
+
+	};
+
+
+	var _setup = function (args) {
+
+		var el = args.el;
+
+		this.current = args.goto || 0;
+
+		// storing the elements for later
+		this.el = el;
+		this.carousel = el.find('.carousel');
+		this.list = el.find('.carousel-list');
+		this.slides = el.find('.carousel-item');
+		this.nav = el.find('.carousel-nav');
+		this.prevNext = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide="prev"], [data-gotoslide="next"]') : false;
+		this.paginators = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide]') : false;
+
+		this.slideCount = this.slides.length;
+
+	};
+
+
+	var _calcDimentions = function () {
+
+		var firstSlide = this.slides.first(),
+            moveDist = parseInt(firstSlide.css('width'), 10) + parseInt(firstSlide.css('marginRight'), 10),
+            carouselWidth = parseInt(this.carousel.css('width'), 10);
+
+        // the carousel moves the distance of the width of the slides
+        this.moveDist = moveDist;
+
+        // However, if there are multiple items in the carousel view window
+        // then we have to make sure we don't want to 'slide-past' the last item
+        if (moveDist < carouselWidth) {
+            var combinedSlideWidth = moveDist * this.slides.length + parseInt(this.list.css('paddingRight'), 10);
+            this.maxMoveLeft = combinedSlideWidth - carouselWidth;
+
+        }
+
+	};
+
 
 
 
@@ -82,9 +170,9 @@
 
 		init: function (args) {
 
-			this._setup(args);
-			this._calcDimentions();
-			this._bindEvents();
+			_setup.call(this, args);
+			_calcDimentions.call(this);
+			_bindEvents.call(this, args);
 
 			// start the functionality of the slider
 			this.goto(this.current);
@@ -326,98 +414,10 @@
 
             return this;
 
-        },
-
-
-		_bindEvents: function (el) {
-
-			var that = this,
-				eventType = args.eventType || 'click';
-
-			this.nav.on(eventType, '[data-gotoslide]', function (evt) {
-				evt.preventDefault();
-
-				var where = this.getAttribute('data-gotoslide');
-				that.processWhere(where, args.continuous);
-
-			});
-
-			this.carousel.on(eventType, function (evt) {
-				evt.preventDefault();
-				that.processWhere('next', args.continuous);
-
-			});
-
-			// pause the auto timeout where the user is focusing in on it
-			if (args.automove) {
-				args.el.on({
-					mouseenter: function (evt) {
-						if (that._autoInterval) clearInterval(that._autoInterval), that._autoInterval = false;
-					},
-					mouseleave: function () {
-						if (!that._autoInterval) that.initAutomove(args.automove);
-					}
-				});
-			}
-
-			// Enable keyboard naviagation
-			if (args.keyNav) {
-				if (window.addEventListener) window.addEventListener('keydown', function (evt) {
-					var keycode = evt.keyCode || false;
-					if (keycode) {
-
-						// Cycling (prev/next using key arrows)
-						if (keycode === 37) { // left
-							that.processWhere('prev', args.continuous);
-						} else if (keycode === 39) { // left
-							that.processWhere('next', args.continuous);
-						}
-
-					}
-				});
-			}
-
-		},
-
-		_calcDimentions: function () {
-
-			var firstSlide = this.slides.first(),
-                moveDist = parseInt(firstSlide.css('width'), 10) + parseInt(firstSlide.css('marginRight'), 10),
-                carouselWidth = parseInt(this.carousel.css('width'), 10);
-
-            // the carousel moves the distance of the width of the slides
-            this.moveDist = moveDist;
-
-            // However, if there are multiple items in the carousel view window
-            // then we have to make sure we don't want to 'slide-past' the last item
-            if (moveDist < carouselWidth) {
-                var combinedSlideWidth = moveDist * this.slides.length + parseInt(this.list.css('paddingRight'), 10);
-                this.maxMoveLeft = combinedSlideWidth - carouselWidth;
-
-            }
-
-		},
-
-		_setup: function (args) {
-
-			var el = args.el;
-
-			this.current = args.goto || 0;
-
-			// storing the elements for later
-			this.el = el;
-			this.carousel = el.find('.carousel');
-			this.list = el.find('.carousel-list');
-			this.slides = el.find('.carousel-item');
-			this.nav = el.find('.carousel-nav');
-			this.prevNext = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide="prev"], [data-gotoslide="next"]') : false;
-			this.paginators = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide]') : false;
-
-			this.slideCount = this.slides.length;
-
-		}
+        }
 
 	};
+
 
 	carousel.init(args);
 
