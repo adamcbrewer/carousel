@@ -32,7 +32,7 @@
 	 * @return {object}        A merged object
 	 *
 	 */
-	var extend = function(obj, extObj) {
+	function extend (obj, extObj) {
 		if (arguments.length > 2) {
 			var a = 1;
 			for (a; a < arguments.length; a++) {
@@ -44,7 +44,7 @@
 			}
 		}
 		return obj;
-	};
+	}
 
 
 	/**
@@ -61,11 +61,40 @@
 	};
 
 	// merging passed in arguments with our own
-	args = extend(defaultArgs, args);
+	this.args = args = extend(defaultArgs, args);
 
 
 
-	var _bindEvents = function (args) {
+	/**
+	 *
+	 *
+	 */
+	function _setup (args) {
+
+		var el = args.el;
+
+		this.current = args.goto || 0;
+
+		// storing the elements for later
+		this.el = el;
+		this.carousel = el.find('.carousel');
+		this.list = el.find('.carousel-list');
+		this.slides = el.find('.carousel-item');
+		this.nav = el.find('.carousel-nav');
+		this.prevNext = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide="prev"], [data-gotoslide="next"]') : false;
+		this.paginators = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide]') : false;
+
+		this.slideCount = this.slides.length;
+
+	}
+
+
+
+	/**
+	 *
+	 *
+	 */
+	function _bindEvents (args) {
 
 		var that = this,
 			eventType = args.eventType || 'click';
@@ -91,7 +120,7 @@
 					if (that._autoInterval) clearInterval(that._autoInterval), that._autoInterval = false;
 				},
 				mouseleave: function () {
-					if (!that._autoInterval) that.initAutomove(args.automove);
+					if (!that._autoInterval) _initAutomove.call(that, args.automove);
 				}
 			});
 		}
@@ -113,30 +142,15 @@
 			});
 		}
 
-	};
+	}
 
 
-	var _setup = function (args) {
 
-		var el = args.el;
-
-		this.current = args.goto || 0;
-
-		// storing the elements for later
-		this.el = el;
-		this.carousel = el.find('.carousel');
-		this.list = el.find('.carousel-list');
-		this.slides = el.find('.carousel-item');
-		this.nav = el.find('.carousel-nav');
-		this.prevNext = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide="prev"], [data-gotoslide="next"]') : false;
-		this.paginators = args.pagination ? el.find('.carousel-pagination').find('[data-gotoslide]') : false;
-
-		this.slideCount = this.slides.length;
-
-	};
-
-
-	var _calcDimentions = function () {
+	/**
+	 *
+	 *
+	 */
+	function _calcDimentions () {
 
 		var firstSlide = this.slides.first(),
             moveDist = parseInt(firstSlide.css('width'), 10) + parseInt(firstSlide.css('marginRight'), 10),
@@ -153,7 +167,25 @@
 
         }
 
-	};
+	}
+
+
+	/**
+	 * Automated animation of the carousel.
+	 * Requires an integer of milliseconds to be passed
+	 * in to the 'automove' property when initiated
+	 *
+	 */
+	function _initAutomove (int) {
+		int = (typeof int === 'number') ? int : 4000;
+		var that = this;
+
+		// TODO - keep this private
+		this._autoInterval = setInterval(function () {
+			that.processWhere('next', args.continuous);
+		}, int);
+
+	}
 
 
 
@@ -162,265 +194,240 @@
 	// Public Methods
 	// =======================
 	//
+	this.init = function (args) {
+
+		_setup.call(this, args);
+		_calcDimentions.call(this);
+		_bindEvents.call(this, args);
+
+		// start the functionality of the slider
+		this.goto(this.current);
+
+		// args.automove should be an integer of seconds delay
+		if (args.automove) {
+			_initAutomove.call(this, args.automove);
+		}
+
+	};
 
 
+	/**
+	 * Force the carousel the slide number passed
+	 *
+	 */
+	this.goto = function (pos) {
 
+		pos = parseInt(pos, 10);
 
-	var carousel = {
+		var leftPos = (pos * this.moveDist);
 
-		init: function (args) {
+        // don't overshoot if we have
+        // multiple items in the carousel window
+        if (this.maxMoveLeft && leftPos > this.maxMoveLeft) {
+            leftPos = this.maxMoveLeft;
+        }
 
-			_setup.call(this, args);
-			_calcDimentions.call(this);
-			_bindEvents.call(this, args);
+        this.current = pos;
 
-			// start the functionality of the slider
-			this.goto(this.current);
+        // Update the carousel left position to
+        // bring the requested slide in to view
+        this.list.css({ left: -leftPos });
 
-			// args.automove should be an integer of seconds delay
-			if (args.automove) {
-				this.initAutomove(args.automove);
-			}
-
-		},
-
-
-		/**
-		 * Force the carousel the slide number passed
-		 *
-		 */
-		goto: function (pos) {
-
-			pos = parseInt(pos, 10);
-
-			var leftPos = (pos * this.moveDist);
-
-            // don't overshoot if we have
-            // multiple items in the carousel window
-            if (this.maxMoveLeft && leftPos > this.maxMoveLeft) {
-                leftPos = this.maxMoveLeft;
-            }
-
-            this.current = pos;
-
-            // Update the carousel left position to
-            // bring the requested slide in to view
-            this.list.css({ left: -leftPos });
-
-            if (this.paginators) {
-                this.updatePrevNext(leftPos);
-            }
-
-		},
-
-
-		/**
-		 * Governs the hiding and showing of the 'previous'
-		 * and 'next' pagination links
-		 *
-		 */
-		updatePrevNext: function () {
-			if (!args.continuous) {
-                if (this.slideCount === 1) {
-                    this.prevNext.addClass('disable');
-                } else {
-                    if (this.current === 0) {
-                        this.prevNext.removeClass('disable').filter('[data-gotoslide="prev"]').addClass('disable');
-                    } else if (this.current === this.slideCount-1) {
-                        this.prevNext.removeClass('disable').filter('[data-gotoslide="next"]').addClass('disable');
-                    } else {
-                        if (this.prevNext.hasClass('disable')) this.prevNext.removeClass('disable');
-                    }
-                }
-            }
-
-			// remove the 'next' button if we have multiple
-            // items in the carousel window
-            if (this.maxMoveLeft && slidePos >= this.maxMoveLeft) {
-                this.prevNext.filter('[data-gotoslide="next"]').addClass('disable');
-            }
-
-            if (this.paginators) {
-                this.updatePagination(this.paginators.filter('[data-gotoslide="'+this.current+'"]'));
-            }
-
-		},
-
-
-		/**
-		 * Updates the pagination to highlight
-		 * the 'current' slide
-		 *
-		 */
-		updatePagination: function (el) {
-			this.paginators.removeClass('current');
-			el.addClass('current');
-		},
-
-
-		/**
-		 * Automated animation of the carousel.
-		 * Requires an integer of milliseconds to be passed
-		 * in to the 'automove' property when initiated
-		 *
-		 */
-		initAutomove:  function (int) {
-			int = (typeof int === 'number') ? int : 4000;
-
-			var that = this;
-
-			this._autoInterval = setInterval(function () {
-				that.processWhere('next', args.continuous);
-			}, int);
-
-		},
-
-
-		/**
-		 * Figues out where you want to go in the carousel by passing
-		 * in either a string for 'next|prev', or a slide number.
-		 *
-		 * If 'continuous' is passed in as true, the carousel will
-		 * continue in the direction of choice indefinitely.
-		 *
-		 * @param  {string|number} where
-		 * @param  {boolean} continuous
-		 *
-		 */
-		processWhere: function (where, continuous) {
-			where = where || false;
-			continuous = continuous || false;
-
-			var pos = null;
-			switch (where) {
-
-				case 'prev':
-					if ( ( this.current - 1 ) >= 0 ) {
-						pos = --this.current;
-					} else {
-						if (continuous) this.current = this.slideCount-1; // restart if continuous
-						pos = this.current;
-					}
-					break;
-
-				case 'next':
-					if ( ( this.current + 1 ) < this.slideCount ) {
-						pos = ++this.current;
-					} else {
-						if (continuous) this.current = 0; // restart if continuous
-						pos = this.current;
-					}
-					break;
-
-				// the default should be a number
-				default:
-					pos = parseInt(where, 10);
-					this.current = pos;
-					break;
-
-			}
-			if (pos !== null) this.goto(pos);
-
-		},
-
-
-		/**
-		 * Will add an array of new slide items.
-		 * Items are expected match the HTML structre and style
-		 * of the other items on the slide list.
-		 *
-		 */
-        addItems: function (items) {
-
-            items = items || [];
-
-            if (items.length > 0) {
-                var i = 0;
-                for (i; i < items.length; i++) {
-                    var newSlide = items[i];
-                    this.list.append(newSlide);
-
-                    this.slideCount++;
-
-                    // update the number of paginated items
-                    if (this.paginators) {
-                        var pageItem = this.nav.find('.carousel-page').last(),
-                            newItem = pageItem.clone();
-                        pageItem.after(newItem);
-                        newItem.find('[data-gotoslide]').attr('data-gotoslide', this.slideCount - 1).html(this.slideCount).removeClass('current');
-                    }
-
-                }
-
-                // need to run setup in order to track some of
-                // the new elements
-                this._setup(this.el);
-
-            }
-
-            return this;
-
-        },
-
-
-        /**
-         * Removes items off the carousel.
-         *
-         * @param  {array} items An array of integers of the slide numbers being removed
-         *
-         */
-        removeItems: function (items) {
-
-			items = items || [];
-
-			// make sure we have items to remove
-            if (items.length > 0) {
-                var i = 0;
-                for (i; i < items.length; i++) {
-
-					// decrement the slideCount and
-					// current slide item as we go
-                    this.slideCount--;
-                    this.current--;
-
-                    // remove the page item we've requested
-                    if (this.paginators) {
-                        $(this.nav.find('li')[i]).remove();
-                    }
-                    // remove the slide element
-                    $(this.slides[i]).remove();
-
-                }
-
-                // need to run setup in order to track some of
-                // the new elements
-                this._setup(this.el);
-
-                // now we need to update the indexes of all
-                // other gotoslide links
-                // TODO: innerHTML of the links
-                if (this.paginators) {
-                    var k = 0;
-                    for (k; k < this.slideCount; k++) {
-                        $(this.paginators[k]).attr('data-gotoslide', k);
-                    }
-                }
-
-                // make sure we're stil on the
-                // last items we were previously viewing
-                this.goto(this.current);
-
-            }
-
-            return this;
-
+        if (this.paginators) {
+            this.updatePrevNext(leftPos);
         }
 
 	};
 
 
-	carousel.init(args);
+	/**
+	 * Governs the hiding and showing of the 'previous'
+	 * and 'next' pagination links
+	 *
+	 */
+	this.updatePrevNext = function () {
+		if (!args.continuous) {
+            if (this.slideCount === 1) {
+                this.prevNext.addClass('disable');
+            } else {
+                if (this.current === 0) {
+                    this.prevNext.removeClass('disable').filter('[data-gotoslide="prev"]').addClass('disable');
+                } else if (this.current === this.slideCount-1) {
+                    this.prevNext.removeClass('disable').filter('[data-gotoslide="next"]').addClass('disable');
+                } else {
+                    if (this.prevNext.hasClass('disable')) this.prevNext.removeClass('disable');
+                }
+            }
+        }
 
-	return carousel;
+		// remove the 'next' button if we have multiple
+        // items in the carousel window
+        if (this.maxMoveLeft && slidePos >= this.maxMoveLeft) {
+            this.prevNext.filter('[data-gotoslide="next"]').addClass('disable');
+        }
+
+        if (this.paginators) {
+            this.updatePagination(this.paginators.filter('[data-gotoslide="'+this.current+'"]'));
+        }
+
+	};
+
+
+	/**
+	 * Updates the pagination to highlight
+	 * the 'current' slide
+	 *
+	 */
+	this.updatePagination = function (el) {
+		this.paginators.removeClass('current');
+		el.addClass('current');
+	};
+
+
+
+	/**
+	 * Figues out where you want to go in the carousel by passing
+	 * in either a string for 'next|prev', or a slide number.
+	 *
+	 * If 'continuous' is passed in as true, the carousel will
+	 * continue in the direction of choice indefinitely.
+	 *
+	 * @param  {string|number} where
+	 * @param  {boolean} continuous
+	 *
+	 */
+	this.processWhere = function (where, continuous) {
+		where = where || false;
+		continuous = continuous || false;
+
+		var pos = null;
+		switch (where) {
+
+			case 'prev':
+				if ( ( this.current - 1 ) >= 0 ) {
+					pos = --this.current;
+				} else {
+					if (continuous) this.current = this.slideCount-1; // restart if continuous
+					pos = this.current;
+				}
+				break;
+
+			case 'next':
+				if ( ( this.current + 1 ) < this.slideCount ) {
+					pos = ++this.current;
+				} else {
+					if (continuous) this.current = 0; // restart if continuous
+					pos = this.current;
+				}
+				break;
+
+			// the default should be a number
+			default:
+				pos = parseInt(where, 10);
+				this.current = pos;
+				break;
+
+		}
+		if (pos !== null) this.goto(pos);
+
+	};
+
+
+	/**
+	 * Will add an array of new slide items.
+	 * Items are expected match the HTML structre and style
+	 * of the other items on the slide list.
+	 *
+	 */
+    this.addItems = function (items) {
+
+        items = items || [];
+
+        if (items.length > 0) {
+            var i = 0;
+            for (i; i < items.length; i++) {
+                var newSlide = items[i];
+                this.list.append(newSlide);
+
+                this.slideCount++;
+
+                // update the number of paginated items
+                if (this.paginators) {
+                    var pageItem = this.nav.find('.carousel-page').last(),
+                        newItem = pageItem.clone();
+                    pageItem.after(newItem);
+                    newItem.find('[data-gotoslide]').attr('data-gotoslide', this.slideCount - 1).html(this.slideCount).removeClass('current');
+                }
+
+            }
+
+            // need to run setup in order to track some of
+            // the new elements
+            _setup.call(this, this.args);
+
+        }
+
+        return this;
+
+    };
+
+
+    /**
+     * Removes items off the carousel.
+     *
+     * @param  {array} items An array of integers of the slide numbers being removed
+     *
+     */
+    this.removeItems = function (items) {
+
+		items = items || [];
+
+		// make sure we have items to remove
+        if (items.length > 0) {
+            var i = 0;
+            for (i; i < items.length; i++) {
+
+				// decrement the slideCount and
+				// current slide item as we go
+                this.slideCount--;
+                this.current--;
+
+                // remove the page item we've requested
+                if (this.paginators) {
+                    $(this.nav.find('li')[i]).remove();
+                }
+                // remove the slide element
+                $(this.slides[i]).remove();
+
+            }
+
+            // need to run setup in order to track some of
+            // the new elements
+            _setup.call(this, this.args);
+
+            // now we need to update the indexes of all
+            // other gotoslide links
+            // TODO: innerHTML of the links
+            if (this.paginators) {
+                var k = 0;
+                for (k; k < this.slideCount; k++) {
+                    $(this.paginators[k]).attr('data-gotoslide', k);
+                }
+            }
+
+            // make sure we're stil on the
+            // last items we were previously viewing
+            this.goto(this.current);
+
+        }
+
+        return this;
+
+    };
+
+
+    // Initialise and return our new carousel
+	this.init(args);
+	return this;
 
 };
