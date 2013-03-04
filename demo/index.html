@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-	<title>CSS Carousel</title>
+	<title>Rad Carousel</title>
 	<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -129,7 +129,7 @@
 	</div> <!-- /wrapper -->
 
 	<script src="jquery-1.8.2.js"></script>
-	<script src="../css-carousel.js"></script>
+	<script src="../rad-carousel.js"></script>
 	<script>
 
 		$(document).ready(function () {
@@ -146,14 +146,14 @@
 			newItem1 += '</figure>';
 			newItem1 += '</li>';
 
-			window.carousel1 = new Carousel({
+			window.carousel1 = new RadCarousel({
 				el: myCarousel,
 				continuous: true,
 				// automove: 2000,
 				keyNav: true
 			});
 
-			window.carousel2 = new Carousel({
+			window.carousel2 = new RadCarousel({
 				el: secondCarousel,
 				continuous: false,
 				// automove: 2000,

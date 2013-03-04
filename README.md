@@ -1,4 +1,4 @@
-### CSS Carousel
+### Rad-Carousel
 ## A CSS animated carousel. Simple to drop-in, easy to skin.
 
 Yes, another carousel, but this one is my own personal one which I want to be as lean and not rely on some kind of JS framework to make it work.

@@ -8,7 +8,7 @@
 //
 //
 //
-;var Carousel = function (args) {
+;var RadCarousel = function (args) {
 
 	//
 	// Private Methods
